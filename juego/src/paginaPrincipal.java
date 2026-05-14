@@ -260,27 +260,30 @@ public class paginaPrincipal extends JFrame {
         return contenedorPrincipalInstrucciones;
     }
 
-    // ================= PANTALLA JUEGO CORREGIDA CON HOLLOW =================
     public class PanelJuego extends JPanel {
+        private  JPanel contenedorAreaPelea;
         private String nombreJugador, seleccionadoPersonaje;
         private JLabel labelNombreJugador, labelVida, labelPuntos, labelTiempo, labelAvatar,labelEnergiaEspiritual;
         private Timer timer; // Timer del HUD
         private int seconds = 0;
         private int velocidad = 15;
-
-
-        // Variables del Villano y Poderes
+        private int vidaJugador = 100;
+        private int energiaEspiritual = 0;
         private boolean mirandoDerechaAvatar = true;
+        private int puntos =0;
+        private ArrayList<JLabel> cantidadKidoJugador = new ArrayList<>();
+
         private ArrayList<JLabel> labelListaHollow =new ArrayList<>();
         private ArrayList<JLabel> ataqueZero = new ArrayList<>();
         private Timer movimientoHollow;
         private Timer tiempoAparecenHollows;
         private int velocidadHollow = 3;
         private int velocidadZero = 7;
-        private int vidaJugador = 100;
-        private int energiaEspiritual = 0;
-        private int puntos =0;
-        private ArrayList<JLabel> cantidadKidoJugador = new ArrayList<>();
+
+        private JLabel jefeFinal;
+        private int vidaJefe = 1000;
+        private Timer timerAparicionJefe;
+        private int contadorSegundos = 0;
 
         public PanelJuego(String nombreJugador, String seleccionadoPersonaje) {
             this.nombreJugador = nombreJugador;
@@ -292,7 +295,7 @@ public class paginaPrincipal extends JFrame {
 
             add(crearCabecera(), BorderLayout.NORTH);
 
-            JPanel contenedorAreaPelea = new JPanel(null);
+             contenedorAreaPelea = new JPanel(null);
             contenedorAreaPelea.setOpaque(false);
             add(contenedorAreaPelea, BorderLayout.CENTER);
 
@@ -339,22 +342,21 @@ public class paginaPrincipal extends JFrame {
                 }
             });
 
+            // --- 1. Timer que genera Hollows cada 2 segundos ---
             tiempoAparecenHollows = new Timer(2000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     JLabel nuevoHollow = crearSprite("juego/src/imagenes/hollow.png", 700, 200);
-
                     labelListaHollow.add(nuevoHollow);
                     contenedorAreaPelea.add(nuevoHollow);
-
                     contenedorAreaPelea.repaint();
 
+                    // Timer de disparo para cada Hollow
                     Timer disparoIndividual = new Timer(2500, ev -> {
                         if (labelListaHollow.contains(nuevoHollow)) {
                             lanzarZero(contenedorAreaPelea, nuevoHollow);
                         } else {
                             ((Timer)ev.getSource()).stop();
-                            System.out.println("Timer de disparo detenido: el Hollow ya no existe.");
                         }
                     });
                     disparoIndividual.start();
@@ -362,6 +364,21 @@ public class paginaPrincipal extends JFrame {
             });
             tiempoAparecenHollows.setInitialDelay(0);
             tiempoAparecenHollows.start();
+
+            Timer relojPartida = new Timer(1000, e -> {
+                contadorSegundos++;
+
+
+                if (contadorSegundos == 10) {
+
+
+
+                    aparecerJefeFinal();
+
+                    ((Timer)e.getSource()).stop();
+                }
+            });
+            relojPartida.start();
 
             movimientoHollow = new Timer(50, e -> {
 
@@ -372,13 +389,38 @@ public class paginaPrincipal extends JFrame {
 
                     boolean mirarDerecha = hollowActual.getX() < labelAvatar.getX();
 
-                    girarImagenHollow(hollowActual, mirarDerecha);
-                }
+                    girarImagenHollow(hollowActual, mirarDerecha, "juego/src/imagenes/hollow.png");
+                }if (jefeFinal != null) {
+                    moverHollowIA(jefeFinal);
+
+                    boolean jefeMiraDerecha = jefeFinal.getX() < labelAvatar.getX();
+
+                    girarImagenHollow(jefeFinal, jefeMiraDerecha, "juego/src/imagenes/ichigoBankai.png");                }
                 actualizarZeros(contenedorAreaPelea);
                 actualizarKidoJugador(contenedorAreaPelea);
             });
             movimientoHollow.start();
-        }private void lanzarKidoJugador(JPanel contenedorAreaJuego) {
+
+        }private void aparecerJefeFinal() {
+            jefeFinal = crearSprite("juego/src/imagenes/ichigoBankai.png", 600, 150);
+            jefeFinal.setSize(150, 200); // El jefe es más grande
+            jefeFinal.setText("vida Jefe: 1000" );
+            jefeFinal.setForeground(Color.white);
+            contenedorAreaPelea.add(jefeFinal);
+
+            Timer ataqueJefe = new Timer(1500, e -> {
+                if (jefeFinal != null && jefeFinal.getParent() != null) {
+                    lanzarZero(contenedorAreaPelea, jefeFinal);
+                } else {
+                    ((Timer)e.getSource()).stop();
+                }
+            });
+            ataqueJefe.start();
+
+            contenedorAreaPelea.repaint();
+            System.out.println("¡HA APARECIDO EL JEFE FINAL!");
+        }
+        private void lanzarKidoJugador(JPanel contenedorAreaJuego) {
             JLabel kido = new JLabel();
             kido.setOpaque(true);
             kido.setBackground(Color.CYAN);
@@ -398,28 +440,71 @@ public class paginaPrincipal extends JFrame {
                 JLabel nuevoKido = cantidadKidoJugador.get(i);
                 int dir = (int) nuevoKido.getClientProperty("direccion");
 
-                nuevoKido.setLocation(nuevoKido.getX() + (10 * dir), nuevoKido.getY());
+                nuevoKido.setLocation(nuevoKido.getX() + (5 * dir), nuevoKido.getY());
+
+
+                boolean kidoEliminado = false;
 
                 for (int j = 0; j < labelListaHollow.size(); j++) {
                     JLabel nuevoHollow = labelListaHollow.get(j);
+
                     if (nuevoKido.getBounds().intersects(nuevoHollow.getBounds())) {
-                      puntos += 10;
-                      labelPuntos.setText("Puntos: " + puntos);
+                        puntos += 10;
+                        labelPuntos.setText("Puntos: " + puntos);
+
                         area.remove(nuevoHollow);
                         labelListaHollow.remove(j);
 
                         area.remove(nuevoKido);
                         cantidadKidoJugador.remove(i);
 
+
+                        kidoEliminado = true;
                         System.out.println("¡Hollow eliminado!");
                         area.repaint();
-                        break;
+                        break; // Sale del bucle de hollows
                     }
                 }
 
-                if (nuevoKido != null && (nuevoKido.getX() > 800 || nuevoKido.getX() < -20)) {
-                    area.remove(nuevoKido);
-                    cantidadKidoJugador.remove(i);
+
+                if (!kidoEliminado && jefeFinal != null) {
+                    if (nuevoKido.getBounds().intersects(jefeFinal.getBounds())) {
+                        vidaJefe -= 5;
+                        puntos += 10;
+                        labelPuntos.setText("Puntos: " + puntos);
+
+
+                        System.out.println("Vida Jefe: " + vidaJefe);
+
+
+                        area.remove(nuevoKido);
+                        cantidadKidoJugador.remove(i);
+                        i--;
+                        kidoEliminado = true;
+
+                        if (vidaJefe <= 0) {
+                            area.remove(jefeFinal);
+
+
+                            if (vidaJugador > 50) {
+                                puntos += 500;
+                                labelPuntos.setText("Puntos: " + puntos);
+                            }
+
+                            jefeFinal = null;
+                            System.out.println("¡JEFE DERROTADO!");
+                        }
+                        area.repaint();
+                    }
+                }
+
+
+                if (!kidoEliminado) {
+                    if (nuevoKido.getX() > 800 || nuevoKido.getX() < -20) {
+                        area.remove(nuevoKido);
+                        cantidadKidoJugador.remove(i);
+                        i--;
+                    }
                 }
             }
         }
@@ -457,7 +542,6 @@ public class paginaPrincipal extends JFrame {
             zero.setBackground(Color.WHITE);
             zero.setBounds(hollowQueDispara.getX() + 40, hollowQueDispara.getY() + 40, 15, 15);
 
-            // Calculamos dirección: si el hollow está a la izquierda del avatar, dispara a la derecha
             int direccion = (hollowQueDispara.getX() < labelAvatar.getX()) ? 1 : -1;
             zero.putClientProperty("direccion", direccion);
 
@@ -469,23 +553,19 @@ public class paginaPrincipal extends JFrame {
 
         private void actualizarZeros(JPanel area) {
             for (int i = 0; i < ataqueZero.size(); i++) {
-                JLabel b = ataqueZero.get(i);
+                JLabel nuevoZero = ataqueZero.get(i);
 
-                // RECUPERAMOS LA DIRECCIÓN (por defecto 1 si falla)
-                int dir = (int) b.getClientProperty("direccion");
+                int dir = (int) nuevoZero.getClientProperty("direccion");
 
-                // Aplicamos la dirección a la velocidad
-                b.setLocation(b.getX() + (velocidadZero * dir), b.getY());
+                nuevoZero.setLocation(nuevoZero.getX() + (velocidadZero * dir), nuevoZero.getY());
 
-                // Colisión con el Jugador
-                if (b.getBounds().intersects(labelAvatar.getBounds())) {
+                if (nuevoZero.getBounds().intersects(labelAvatar.getBounds())) {
                     vidaJugador -= 10;
                     labelVida.setText("Vida: " + vidaJugador);
-                    // ... resto de tu lógica de muerte
 
-                    area.remove(b);
+                    area.remove(nuevoZero);
                     ataqueZero.remove(i);
-                    if (vidaJugador <= 0) {
+                    if (vidaJugador <= 0 || vidaJefe <= 0) {
                         detenerTodo();
                         JOptionPane.showMessageDialog(null, "¡FIN DEL JUEGO!");
                         cardLayout.show(contenedorPrincipalInicio, "MENU");
@@ -493,9 +573,8 @@ public class paginaPrincipal extends JFrame {
                     continue;
                 }
 
-                // Eliminar si sale por la derecha O por la izquierda
-                if (b.getX() > 800 || b.getX() < -20) {
-                    area.remove(b);
+                if (nuevoZero.getX() > 800 || nuevoZero.getX() < -20) {
+                    area.remove(nuevoZero);
                     ataqueZero.remove(i);
                 }
             }
@@ -532,23 +611,23 @@ public class paginaPrincipal extends JFrame {
 
         }
 
-        private void girarImagenHollow(JLabel hollow, boolean mirandoDerecha) {
-            String ruta = "juego/src/imagenes/hollow.png";
-            ImageIcon iconoOriginal = new ImageIcon(ruta);
+        private void girarImagenHollow(JLabel label, boolean mirandoDerecha, String rutaImagen) {
+            ImageIcon iconoOriginal = new ImageIcon(rutaImagen); // Ahora usa la ruta que le pases
             if (iconoOriginal.getIconWidth() == -1) return;
 
             Image img = iconoOriginal.getImage();
-            BufferedImage bi = new BufferedImage(80, 100, BufferedImage.TYPE_INT_ARGB);
+            // Ajustamos el tamaño del BufferedImage al tamaño actual del label
+            BufferedImage bi = new BufferedImage(label.getWidth(), label.getHeight(), BufferedImage.TYPE_INT_ARGB);
             Graphics2D g2d = bi.createGraphics();
 
             if (mirandoDerecha) {
-                g2d.drawImage(img, 0, 0, 80, 100, null);
+                g2d.drawImage(img, 0, 0, label.getWidth(), label.getHeight(), null);
             } else {
-                g2d.drawImage(img, 80, 0, -80, 100, null);
+                g2d.drawImage(img, label.getWidth(), 0, -label.getWidth(), label.getHeight(), null);
             }
 
             g2d.dispose();
-            hollow.setIcon(new ImageIcon(bi));
+            label.setIcon(new ImageIcon(bi));
         }
 
 
@@ -578,7 +657,7 @@ public class paginaPrincipal extends JFrame {
             labelPersonaje.setForeground(new Color(180, 180, 255));
 
             labelEnergiaEspiritual = new JLabel();
-            labelEnergiaEspiritual.setText("E.E: 0");
+            labelEnergiaEspiritual.setText("Energia: 0");
             labelEnergiaEspiritual.setFont(fuentePropia().deriveFont(15f));
             labelEnergiaEspiritual.setForeground(new Color(100, 200, 255));
 
