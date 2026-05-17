@@ -1,10 +1,11 @@
 import javax.swing.*;
+import java.sql.*;
 
 public class Main {
     public static void main(String[] args) {
 
 
-        JFrame frame = new JFrame("Sociedad de Almas");
+         JFrame frame = new JFrame("Sociedad de Almas");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
         frame.setResizable(false);
@@ -15,10 +16,10 @@ public class Main {
         frame.setVisible(true);
 
 
-        /* String url = "jdbc:mysql://localhost:3306/sociedad_almas";
+  /*     String url = "jdbc:mysql://localhost:3306/sociedad_almas";
         String user = "root";
         String password = "";
-        String usarSelect = "select *from personaje where nombre_personaje = ? ";
+        String usarSelect = "select *from PARTIDA where ganador = ? ";
 
         try {
             Connection conexion = DriverManager.getConnection(url, user, password);
@@ -28,7 +29,11 @@ public class Main {
             ResultSet nuevo = select.executeQuery();
             while (nuevo.next()) {
                 System.out.println( nuevo.getInt(1) + "-" +
-                        nuevo.getString(2));
+                                nuevo.getInt(2) + "-" +
+                        nuevo.getInt(3) + "-" +
+                        nuevo.getInt(4) + "-" +
+                                nuevo.getInt(5) + "-" +
+                        nuevo.getBoolean(6));
             }
             nuevo.close();
             select.close();
@@ -37,7 +42,7 @@ public class Main {
         } catch (SQLException ex) {
             System.out.println("Error al guardar partida: ");
 
-        } */
+        }*/
     }
 }
 
