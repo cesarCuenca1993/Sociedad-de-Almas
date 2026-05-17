@@ -218,9 +218,9 @@ cd sociedad-de-almas
 #  Capturas del Juego
 
 ```md
-![Menú Principal](src/docs/menu.png)
-![Gameplay del Juego](src/docs/juego.png)
-![Selección de Personaje](src/docs/seleccion.png)
+![Menu](docs/menu.png)
+![Juego](docs/juego.png)
+![Seleccion](docs/seleccion.png)
 ```
 
 
