@@ -19,8 +19,9 @@ CREATE TABLE PARTIDA (
     id_personaje_seleccionado INT NOT NULL,
     puntuacion INT NOT NULL,
     vida_restante INT NOT NULL,
-    resultado VARCHAR(50) NOT NULL,
+    ganador boolean NOT NULL,
     fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
     FOREIGN KEY (id_personaje_seleccionado) REFERENCES PERSONAJE(id_personaje)
 );
+select * from partida;
