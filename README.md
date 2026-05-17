@@ -131,13 +131,12 @@ El proyecto utiliza tres tablas principales para almacenar la información del j
 ##  Script SQL
 
 ```sql
-CREATE DATABASE sociedad_almas;
-USE sociedad_almas;
+create database sociedad_almas;
+use  sociedad_almas;
 
-CREATE TABLE PERSONAJE (
-    id_personaje INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_personaje VARCHAR(100) NOT NULL,
-    descripcion TEXT NOT NULL
+create table personaje (
+    id_personaje INT  PRIMARY KEY,
+    nombre_personaje VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE USUARIO (
@@ -153,7 +152,7 @@ CREATE TABLE PARTIDA (
     id_personaje_seleccionado INT NOT NULL,
     puntuacion INT NOT NULL,
     vida_restante INT NOT NULL,
-    resultado VARCHAR(50) NOT NULL,
+    ganador boolean NOT NULL,
     fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario),
     FOREIGN KEY (id_personaje_seleccionado) REFERENCES PERSONAJE(id_personaje)
@@ -171,16 +170,23 @@ CREATE TABLE PARTIDA (
 #  Estructura del Proyecto
 
 ```bash
-sociedad-de-almas/
-│── src/
-│   ├── main/
-│   ├── personajes/
-│   ├── enemigos/
-│   ├── interfaces/
-│   ├── utilidades/
-│── resources/
-│── database/
-│── README.md
+Sociedad Almas/
+ ├── src/
+ │    ├── Fuentes/
+ │    ├── imagenes/
+ │    └── formularios/
+ │         ├── META-INF/
+ │         ├── out.production.juego/
+ │         ├── Fuente.java
+ │         ├── Main.java
+ │         ├── paginaInstruccion/
+ │         ├── paginaPrincipal/
+ │         ├── paginaRegistro/
+ │         └── panelJuego/
+ ├── mysql-connector-j-9.7.0.jar
+ ├── Proyecto free.iml
+ ├── README.md
+ └── sociedad_almas.sql
 ```
 
 #  Instalación y Ejecución
@@ -212,9 +218,9 @@ cd sociedad-de-almas
 #  Capturas del Juego
 
 ```md
-![Menu Principal](docs/menu.png)
-![Gameplay](docs/gameplay.png)
-![Jefe Final](docs/jefe.png)
+![Menú Principal](src/docs/menu.png)
+![Gameplay del Juego](src/docs/juego.png)
+![Selección de Personaje](src/docs/seleccion.png)
 ```
 
 
