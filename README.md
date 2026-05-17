@@ -217,11 +217,11 @@ cd sociedad-de-almas
 
 #  Capturas del Juego
 
-```md
+## Capturas del Juego
+
 ![Menu](docs/menu.png)
 ![Juego](docs/juego.png)
 ![Seleccion](docs/seleccion.png)
-```
 
 
 #  Fin del Juego
